@@ -81,12 +81,12 @@ units-per-em and vertical metrics as Fixedsys; they are imported at double the
 Latin advance width. Donor-specific TrueType hinting is removed during the
 merge so the result does not depend on the donor's global hinting tables.
 
-On OS X, the default `make` target also copies `FSEX302.ttf` to the user Fonts
-folder and updates the font cache. To build without installing, request the
-font targets directly:
+On OS X, the default `make` target also copies `FixedsysEX.ttf` to the user
+Fonts folder and updates the font cache. To build without installing, request
+the font targets directly:
 
 ```sh
-make FSEX302.ttf FSEX302-alt.ttf
+make FixedsysEX.ttf FixedsysEX-alt.ttf
 ```
 
 Run the same structural checks used by CI with:
@@ -98,8 +98,8 @@ make verify
 ## Automated builds and releases
 
 GitHub Actions builds and verifies both fonts for every branch push and pull
-request, and stores `FSEX302.ttf`, `FSEX302-alt.ttf`, and `SHA256SUMS` as a
-workflow artifact for 30 days.
+request, and stores `FixedsysEX.ttf`, `FixedsysEX-alt.ttf`, and `SHA256SUMS` as
+a workflow artifact for 30 days.
 
 Pushing a tag whose name starts with `v` publishes the verified files to a
 GitHub Release. For example:
