@@ -19280,8 +19280,9 @@
       <map code="0x21b9" name="uni21B9"/><!-- LEFTWARDS ARROW TO BAR OVER RIGHTWARDS ARROW TO BAR -->
       <map code="0x21ea" name="uni21EA"/><!-- UPWARDS WHITE ARROW FROM BAR -->
       <map code="0x21e7" name="uni21E7"/><!-- UPWARDS WHITE ARROW -->
-      <map code="0x1f512" name="u01F512"/><!-- LOCK -->
     </cmap_format_4>
+    <!-- U+1F512 LOCK is added to a complete format 12 cmap by
+         scripts/merge_hangul.py after this BMP-only table is compiled. -->
   </cmap>
 
   <loca>
