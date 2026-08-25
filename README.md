@@ -68,14 +68,18 @@ that allows to edit and create individual glyphs and ligatures.
 
 The supported programming ligatures are listed in the `ligatures.txt` file.
 
-To create the TTF files, install [FontTools](https://fonttools.readthedocs.io/)
-and run `make`. The build first compiles the Fixedsys TTX, then copies only the
-Hangul glyphs from `font-mix/ko.ttf` into both the default and ALT outputs. The
+To create the TTF and WOFF2 files, install the build dependencies and run
+`make`. The build first compiles the Fixedsys TTX, then copies only the Hangul
+glyphs from `font-mix/DungGeunMo.ttf` into both the default and ALT outputs. The
 imported set contains modern Hangul syllables, Jamo, compatibility Jamo, and any
 mapped extended or halfwidth Hangul characters. Fixedsys glyphs, metrics, and
 programming ligatures remain authoritative.
 
-The bundled `font-mix/ko.ttf` identifies itself as DungGeunMo version 1.301 and
+```sh
+python3 -m pip install -r requirements-build.txt
+```
+
+The bundled `font-mix/DungGeunMo.ttf` identifies itself as version 1.301 and
 Public Domain in its font metadata. Its Hangul glyphs use the same 160
 units-per-em and vertical metrics as Fixedsys; they are imported at double the
 Latin advance width. Donor-specific TrueType hinting is removed during the
@@ -86,7 +90,19 @@ Fonts folder and updates the font cache. To build without installing, request
 the font targets directly:
 
 ```sh
-make FixedsysEX.ttf FixedsysEX-alt.ttf
+make FixedsysEX.ttf FixedsysEX-alt.ttf FixedsysEX.woff2 FixedsysEX-alt.woff2
+```
+
+The WOFF2 files can be used directly from CSS:
+
+```css
+@font-face {
+  font-family: "FixedsysEX";
+  src: url("./FixedsysEX.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
 ```
 
 Run the same structural checks used by CI with:
@@ -98,15 +114,15 @@ make verify
 ## Automated builds and releases
 
 GitHub Actions builds and verifies both fonts for every branch push and pull
-request, and stores `FixedsysEX.ttf`, `FixedsysEX-alt.ttf`, and `SHA256SUMS` as
-a workflow artifact for 30 days.
+request, and stores the default and ALT TTF/WOFF2 files plus `SHA256SUMS` as a
+workflow artifact for 30 days.
 
 Pushing a tag whose name starts with `v` publishes the verified files to a
 GitHub Release. For example:
 
 ```sh
-git tag v3.02.0
-git push origin v3.02.0
+git tag v3.02.2
+git push origin v3.02.2
 ```
 
 Re-running the tagged workflow replaces existing release assets with the newly

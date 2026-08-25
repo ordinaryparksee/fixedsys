@@ -40,7 +40,13 @@ jobs:
         run: make verify
 
       - name: Create checksums
-        run: sha256sum FixedsysEX.ttf FixedsysEX-alt.ttf > SHA256SUMS
+        run: |
+          sha256sum \
+            FixedsysEX.ttf \
+            FixedsysEX-alt.ttf \
+            FixedsysEX.woff2 \
+            FixedsysEX-alt.woff2 \
+            > SHA256SUMS
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v7
@@ -49,6 +55,8 @@ jobs:
           path: |
             FixedsysEX.ttf
             FixedsysEX-alt.ttf
+            FixedsysEX.woff2
+            FixedsysEX-alt.woff2
             SHA256SUMS
           if-no-files-found: error
           retention-days: 30
@@ -74,7 +82,13 @@ jobs:
           GH_REPO: ${{ github.repository }}
           RELEASE_TAG: ${{ github.ref_name }}
         run: |
-          assets=(dist/FixedsysEX.ttf dist/FixedsysEX-alt.ttf dist/SHA256SUMS)
+          assets=(
+            dist/FixedsysEX.ttf
+            dist/FixedsysEX-alt.ttf
+            dist/FixedsysEX.woff2
+            dist/FixedsysEX-alt.woff2
+            dist/SHA256SUMS
+          )
           if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
             gh release upload "$RELEASE_TAG" "${assets[@]}" --clobber
           else
