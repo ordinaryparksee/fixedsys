@@ -76,6 +76,11 @@ jobs:
       contents: write
 
     steps:
+      - name: Check out release tag
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
       - name: Download verified fonts
         uses: actions/download-artifact@v8
         with:
