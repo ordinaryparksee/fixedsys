@@ -6230,7 +6230,7 @@
   <head>
     <!-- Most of this table will be recalculated by the compiler -->
     <tableVersion value="1"/>
-    <fontRevision value="3.02"/>
+    <fontRevision value="3.024"/>
     <checkSumAdjustment value="0x5dc58743"/>
     <magicNumber value="0x5f0f3cf5"/>
     <flags value="00000000 00001001"/>
@@ -252066,13 +252066,17 @@
       Regular
     </namerecord>
     <namerecord nameID="3" platformID="1" platEncID="0" langID="0x0" unicode="True">
-      DarienValentine: Fixedsys Excelsior 3.022: 2017
+#ifdef ALT_LESSEQUAL
+      ordinaryparksee:FixedsysExcelsior:3.2.4:ALT:20261110
+#else
+      ordinaryparksee:FixedsysExcelsior:3.2.4:Default:20261110
+#endif
     </namerecord>
     <namerecord nameID="4" platformID="1" platEncID="0" langID="0x0" unicode="True">
       Fixedsys Excelsior
     </namerecord>
     <namerecord nameID="5" platformID="1" platEncID="0" langID="0x0" unicode="True">
-      Version 3.022 2017
+      Version 3.024; release v3.2.4; 2026-11-10
     </namerecord>
     <namerecord nameID="6" platformID="1" platEncID="0" langID="0x0" unicode="True">
       FixedsysExcelsiorIIIb
@@ -252099,13 +252103,17 @@
       Regular
     </namerecord>
     <namerecord nameID="3" platformID="3" platEncID="1" langID="0x409">
-      DarienValentine: Fixedsys Excelsior 3.022: 2017
+#ifdef ALT_LESSEQUAL
+      ordinaryparksee:FixedsysExcelsior:3.2.4:ALT:20261110
+#else
+      ordinaryparksee:FixedsysExcelsior:3.2.4:Default:20261110
+#endif
     </namerecord>
     <namerecord nameID="4" platformID="3" platEncID="1" langID="0x409">
       Fixedsys Excelsior
     </namerecord>
     <namerecord nameID="5" platformID="3" platEncID="1" langID="0x409">
-      Version 3.022 2017
+      Version 3.024; release v3.2.4; 2026-11-10
     </namerecord>
     <namerecord nameID="6" platformID="3" platEncID="1" langID="0x409">
       FixedsysExcelsiorIIIb

@@ -2,6 +2,8 @@
 
 # Fixedsys Excelsior font with programming ligatures
 
+Latest release: [v3.2.4](https://github.com/ordinaryparksee/fixedsys/releases/tag/v3.2.4).
+
 ## Distribution terms
 
 The font was originally authored by Darien Valentine [@bathos](https://github.com/bathos) and provided via a now-defunct site at [fixedsysexcelsior.com](http://www.fixedsysexcelsior.com). This derivative's source code repository and issue tracker can be found at [github.com/kika/fixedsys](https://github.com/kika/fixedsys/).
@@ -53,6 +55,16 @@ Darien simulated the bitmap with TrueType outlines by building the font from
 only works as intended in only one size and usually with antialiasing switched
 off. The size is 16px, or 12pt@96dpi.
 
+Current builds add TrueType pixel-grid hinting for sizes above 16 PPEM, so the
+same font can be used at multiple sizes. The original outlines and
+advance widths remain intact; the rasterizer adjusts pixel boundaries at the
+requested size. At non-native sizes, some strokes and gaps become one pixel
+wider or narrower. Paired stem boundaries guide the rounding phase for each
+glyph axis, reducing unequal stem widths and size-to-size thinning. This keeps
+the pixel style sharp instead of preserving
+fractional, antialiased edges. At 16 PPEM and below, the new glyph instructions
+do not adjust the outlines.
+
 He also added a lot of foreign characters and made the font Unicode.
 
 ## Tech trivia
@@ -84,6 +96,31 @@ Public Domain in its font metadata. Its Hangul glyphs use the same 160
 units-per-em and vertical metrics as Fixedsys; they are imported at double the
 Latin advance width. Donor-specific TrueType hinting is removed during the
 merge so the result does not depend on the donor's global hinting tables.
+After merging, `scripts/hint_pixels.py` adds an independent shared hinting
+program to the axis-aligned outlines on the native 10-unit grid, including
+Hangul. Curved, diagonal, and finer-detail outlines are left without the new
+instructions. The pre-program opts into native ClearType instruction behavior
+on compatible rasterizers, allowing
+horizontal grid fitting that compatibility mode can otherwise suppress.
+Rotated and non-uniformly stretched text bypasses the new instructions.
+
+The build measures opposing edges of one- and two-cell stems and chooses
+phases that minimize their normalized width errors, prioritizing longer
+stems. Each axis still uses one monotone coordinate map to preserve counters
+and narrow gaps. A compact profile repeats every 16 device pixels, so the
+correction works across integer sizes rather than only special-casing 21px.
+Profiles are shared and packed into four-bit entries to keep the font program
+under the webfont sanitizer's 128 KiB limit.
+This is a compromise when a glyph's stem requirements conflict; it does not
+guarantee identical thickness for every detail of every character.
+
+The hinting has been checked with FreeType's legacy (35) and modern (40)
+interpreters and Linux Chromium. Test samples cover 16, 18, 20, 21, 22, 24, 28,
+32, and 48px, with the supported pixel glyphs' 16px and 32px bitmaps preserved.
+Browser zoom, device pixel ratio, fractional positioning, synthetic bold, and renderers that
+ignore TrueType instructions can still affect sharpness. PPEM refers to device
+pixels per em, not necessarily the CSS `font-size`. This does not guarantee
+identical results on macOS, Windows, and Linux.
 
 On OS X, the default `make` target also copies `FixedsysEX.ttf` to the user
 Fonts folder and updates the font cache. To build without installing, request
@@ -111,6 +148,24 @@ Run the same structural checks used by CI with:
 make verify
 ```
 
+To execute the hinting in FreeType and check rendering regressions as CI does:
+
+```sh
+python3 -m pip install -r requirements-test.txt
+make test
+```
+
+The rendering checks execute every supported pixel glyph at 18, 21, 22, and 32
+PPEM in both interpreters, and sample Latin, numbers, and Hangul at the sizes
+listed above. They also check that outlines, metrics, Unicode mappings, and
+programming ligatures survive the hinting stage unchanged.
+At 21 PPEM, all supported outlines are also checked for collapsed gaps and
+reversed edges. The long paired stems of `0`, `8`, and `H` must have equal,
+nondecreasing widths throughout 17–64 PPEM.
+The currency sample `$4.743708` must not lose ink when the size increases
+through that range. Packed profiles are executed for every size residue in
+both FreeType interpreters.
+
 ## Automated builds and releases
 
 GitHub Actions builds and verifies both fonts for every branch push and pull
@@ -121,13 +176,18 @@ Pushing a tag whose name starts with `v` publishes the verified files to a
 GitHub Release. For example:
 
 ```sh
-git tag v3.02.2
-git push origin v3.02.2
+git tag -a v3.2.4 -m "Release v3.2.4"
+git push origin v3.2.4
 ```
 
 Re-running the tagged workflow replaces existing release assets with the newly
 verified files. No repository secret is required; the release job uses the
 workflow's narrowly scoped `contents: write` permission.
+Tagged builds require the tag version to match `VERSION`; verification also
+checks the fonts' release version and unique identifiers. The default and ALT
+variants have distinct unique identifiers for this release.
+Release notes come from the annotated tag (or the commit message for a
+lightweight tag).
 
 ## Supported software (incomplete list, send updates please)
 

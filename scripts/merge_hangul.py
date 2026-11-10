@@ -123,7 +123,7 @@ def merge_hangul(base_path: Path, donor_path: Path, output_path: Path) -> int:
         for glyph_name in selected_names:
             glyph = deepcopy(donor_glyf[glyph_name])
             # Donor instructions refer to donor-specific cvt/fpgm/prep tables.
-            # Pixel-grid-aligned outlines remain crisp without those instructions.
+            # The next build stage supplies independent Fixedsys pixel hints.
             glyph.removeHinting()
             base["glyf"].glyphs[glyph_name] = glyph
             base["hmtx"].metrics[glyph_name] = donor["hmtx"].metrics[glyph_name]

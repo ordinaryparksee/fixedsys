@@ -9,6 +9,10 @@ from pathlib import Path
 from fontTools.ttLib import TTFont
 
 from merge_hangul import is_hangul
+from hint_pixels import PRE_PROGRAM, font_program, glyph_program, hint_plans, phase_catalog, program
+
+
+RELEASE_VERSION = (Path(__file__).resolve().parents[1] / "VERSION").read_text().strip()
 
 
 class VerificationError(RuntimeError):
@@ -23,6 +27,13 @@ def require(condition: bool, message: str) -> None:
 def verify_font(font_path: Path, donor: TTFont, expected_hangul: set[int]) -> bytes:
     font = TTFont(font_path)
     try:
+        for record in font["name"].names:
+            if record.nameID == 3:
+                require(f":{RELEASE_VERSION}:" in record.toUnicode(),
+                        f"{font_path}: outdated unique identifier")
+            elif record.nameID == 5:
+                require(f"release v{RELEASE_VERSION};" in record.toUnicode(),
+                        f"{font_path}: outdated release version")
         cmap = font.getBestCmap() or {}
         actual_hangul = {codepoint for codepoint in cmap if is_hangul(codepoint)}
         missing = expected_hangul - actual_hangul
@@ -43,13 +54,32 @@ def verify_font(font_path: Path, donor: TTFont, expected_hangul: set[int]) -> by
         }
         require(not wrong_widths, f"{font_path}: unexpected Hangul widths {sorted(wrong_widths)}")
 
-        hinted_hangul = []
-        for codepoint in actual_hangul:
-            glyph = font["glyf"][cmap[codepoint]]
-            program = getattr(glyph, "program", None)
-            if program is not None and program.getBytecode():
-                hinted_hangul.append(codepoint)
-        require(not hinted_hangul, f"{font_path}: donor hinting remains in Hangul glyphs")
+        require("fpgm" in font and "prep" in font, f"{font_path}: missing pixel hinting tables")
+        plans = hint_plans(font)
+        catalog = phase_catalog(plans)
+        require(font["fpgm"].program.getBytecode() == font_program(catalog).getBytecode(),
+                f"{font_path}: unexpected font program")
+        require(font["prep"].program.getBytecode() == program(PRE_PROGRAM).getBytecode(),
+                f"{font_path}: unexpected pre-program")
+        require(font["maxp"].maxFunctionDefs >= len(catalog) + 2,
+                f"{font_path}: missing hint function capacity")
+        require(font["maxp"].maxStackElements >= 19, f"{font_path}: insufficient hinting stack")
+        require(font["maxp"].maxStorage >= 1, f"{font_path}: insufficient phase storage")
+        max_instructions = 0
+        for name in font.getGlyphOrder():
+            glyph = font["glyf"][name]
+            instructions = getattr(glyph, "program", None)
+            bytecode = instructions.getBytecode() if instructions is not None else b""
+            expected = b""
+            if name in plans:
+                points, x_phases, y_phases = plans[name]
+                expected = glyph_program(points, catalog[x_phases], catalog[y_phases]).getBytecode()
+            require(bytecode == expected, f"{font_path}: unexpected or missing hinting for {name}")
+            max_instructions = max(max_instructions, len(bytecode))
+        require(font["maxp"].maxSizeOfInstructions >= max_instructions,
+                f"{font_path}: insufficient glyph instruction capacity")
+        require(font["gasp"].version == 1 and font["gasp"].gaspRange == {8: 2, 16: 0, 65535: 15},
+                f"{font_path}: unexpected grid-fitting policy")
 
         format_4 = [
             table
